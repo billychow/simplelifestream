@@ -19,7 +19,7 @@ from dreammx.util import *
 
 class APIHandler(webapp.RequestHandler):
 	def get(self):
-		output = 'document.write(\'<ul>'
+		output = 'document.write(\'<ul class="lifestream">'
 		for stream in LifeStream.instance().get_streams()[:20]:
 			output += static_method('lifestream.feed.'+stream['adapter'], 'parse_js', {'item':stream}).replace("'", "&#039;").replace("\n", "<br />")
 		output += '</ul>\');'

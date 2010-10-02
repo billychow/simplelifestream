@@ -1,0 +1,38 @@
+.lifestream {
+	padding: 0;
+	margin: 0;
+}
+.lifestream li {
+	background: url('../img/icons/generic.png') no-repeat;
+	padding: 0;
+	margin: 0;
+	padding-left: 20px;
+	list-style: none;
+}
+.lifestream .AtomFeed, .lifestream .RssFeed {
+	
+}
+.lifestream .BloggerFeed {
+	background: url('../img/icons/blogger.png') no-repeat;
+}
+.lifestream .DoubanFeed {
+	background: url('../img/icons/douban.png') no-repeat;
+}
+.lifestream .FacebookFeed {
+	background: url('../img/icons/facebook.png') no-repeat;
+}
+.lifestream .GithubFeed {
+	background: url('../img/icons/github.png') no-repeat;
+}
+.lifestream .GoogleReaderShareFeed {
+	background: url('../img/icons/googlereader.png') no-repeat;
+}
+.lifestream .LastFMFeed {
+	background: url('../img/icons/lastfm.png') no-repeat;
+}
+.lifestream .TwitterFeed {
+	background: url('../img/icons/twitter.png') no-repeat;
+}
+.lifestream .WordpressFeed {
+	background: url('../img/icons/wordpress.png') no-repeat;
+}
