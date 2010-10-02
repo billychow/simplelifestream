@@ -26,7 +26,6 @@ class TestHandler(webapp.RequestHandler):
 			getattr(self, name)()
 	
 	def info(self):
-		self.response.out.write('Feed Index: %d <br />' % LifeStream.instance().get_feed_index())
 		self.response.out.write('Feed Size: %d <br />' % len(LifeStream.instance().feeds))
 		self.response.out.write('Data Size: %d <br />' % len(LifeStream.instance().get_data()))
 		self.response.out.write('Stream Size: %d <br />' % len(LifeStream.instance().get_streams()))
@@ -48,9 +47,8 @@ class TestHandler(webapp.RequestHandler):
 	def update(self):
 		ls = LifeStream.instance()
 		for index in range(len(ls.feeds)):
-			if ls.feeds[index].update() == True:
-				if len(ls.feeds[index].data) > 0:
-					ls.set_data(ls.feeds[index].data, index)
+			if ls.feeds[index].update() == True and len(ls.feeds[index].data) > 0:
+				ls.set_data(ls.feeds[index].data, index)
 		ls.merge()
 
 def main():

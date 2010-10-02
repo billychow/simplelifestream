@@ -14,7 +14,7 @@ class LifeStreamTaskWorker(webapp.RequestHandler):
 	def get(self):
 		ls = LifeStream.instance()
 		index = int(self.request.get('index'))
-		if ls.feeds[index].update() == True:
+		if ls.feeds[index].update() == True and len(ls.feeds[index].data) > 0:
 			ls.set_data(ls.feeds[index].data, index)
 			
 class LifeStreamMergeWorker(webapp.RequestHandler):

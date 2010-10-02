@@ -9,15 +9,12 @@ __author__ = "Billy Chow"
 _debug = 0
 
 import os, sys
-import time
-import datetime
+import time, datetime
 import operator
 import yaml
 
 from google.appengine.ext.webapp import util
-from google.appengine.ext import db
 from google.appengine.ext import webapp
-from google.appengine.api import memcache
 
 from lifestream import *
 from lifestream.feed import *
