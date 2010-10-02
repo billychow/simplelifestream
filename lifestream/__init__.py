@@ -1,17 +1,17 @@
-import yaml,copy
+import yaml,copy,logging
 from google.appengine.ext import webapp
 from google.appengine.api import memcache
 from dreammx.util import *
 from dreammx.appengine.cache import memcache as cache
 
 class LifeStream():
-	__instance__ = None
+	_instance = None
 
 	@staticmethod
 	def instance():
-		if LifeStream.__instance__ is None:
-			LifeStream.__instance__ = LifeStream()
-		return LifeStream.__instance__
+		if LifeStream._instance is None:
+			LifeStream._instance = LifeStream()
+		return LifeStream._instance
 
 	def __init__(self):
 		self.initialized = False
@@ -29,14 +29,6 @@ class LifeStream():
 			# Dynamic initialize the feed instance and append to the list
 			self.feeds.append(instantiate('lifestream.feed.'+feed['adapter'], args))
 
-	def get_feed_index(self):
-		feed_index = cache.get_set_default('feed_index', 0)
-		# FIXME: May caused an exception by None Value
-		if feed_index > len(self.config['feeds']) - 1:
-			feed_index = 0
-			memcache.set('feed_index', feed_index)
-		return feed_index
-
 	def get_data(self):
 		return cache.get_set_default('ls_data', {})
 
@@ -49,6 +41,7 @@ class LifeStream():
 		return cache.get_set_default('ls_streams', [])
 
 	def merge(self):
+		logging.info('Merging')
 		streams = []
 		for stream in self.get_data().itervalues():
 			streams.extend(stream)

@@ -5,7 +5,7 @@ from xml.dom import minidom
 from dreammx.ext import feedparser
 from dreammx.util import *
 
-class Feed:
+class Feed(object):
 	def __init__(self, source, title = '', enable = True):
 		self.source = source
 		self.title = title.strip() != '' and title.strip() or ''
@@ -62,7 +62,7 @@ class LastFMFeed(Feed):
 	def __init__(self, username, title = '', enable = True):
 		source = 'http://ws.audioscrobbler.com/1.0/user/'+username+'/recenttracks.xml'
 		self.username = username
-		Feed.__init__(self, source, title, enable)
+		super(LastFMFeed, self).__init__(source, title, enable)
 
 	def update(self):
 		logging.info('UPDATE: %s' % self.source)
@@ -88,7 +88,7 @@ class LastFMFeed(Feed):
 class TwitterFeed(RssFeed):
 	def __init__(self, username, source, title = '', enable = True):
 		self.username = username
-		RssFeed.__init__(self, source, title, enable)
+		super(TwitterFeed, self).__init__(source, title, enable)
 	
 	def update(self):
 		logging.info('UPDATE: %s' % self.source)
