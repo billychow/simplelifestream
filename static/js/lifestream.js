@@ -1,0 +1,1 @@
+document.write('<ul><li><a href="#">test</a></li></ul>');

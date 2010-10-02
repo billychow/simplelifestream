@@ -1,0 +1,4 @@
+cron:
+- description: refresh the queue
+  url: /app_worker/queue
+  schedule: every 1 minutes
