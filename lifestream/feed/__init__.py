@@ -34,11 +34,11 @@ class Feed(object):
 
 	@staticmethod
 	def parse(item = None):
-		return '<li class="%s"><a href="%s">%s</a> via <a href="%s">%s</a> - <span title="%s">%s</span></li>' % (item.adapter, item.link, item.subject, item.origin, item.title, format_timestamp(item.timestamp), get_relative_datetime(item.timestamp))
+		return '<li class="%s"><a href="%s">%s</a> via <a href="%s">%s</a> - <span title="%s">%s</span></li>' % (item['adapter'], item['link'], item['subject'], item['origin'], item['title'], format_timestamp(item['timestamp']), get_relative_datetime(item['timestamp']))
 		
 	@staticmethod
 	def parse_js(item = None):
-		return '<li class="%s">%s via <a href="%s">%s</a> - <span><a href="%s" title="%s">%s</a></span></li>' % (item.adapter, item.subject, item.origin, item.title, item.link, format_timestamp(item.timestamp), get_relative_datetime(item.timestamp))
+		return '<li class="%s">%s via <a href="%s">%s</a> - <span><a href="%s" title="%s">%s</a></span></li>' % (item['adapter'], item['subject'], item['origin'], item['title'], item['link'], format_timestamp(item['timestamp']), get_relative_datetime(item['timestamp']))
 
 class RssFeed(Feed):
 	def update(self):
@@ -116,11 +116,11 @@ class LastFMFeed(Feed):
 		
 	@staticmethod
 	def parse(item = None):
-		return '<li class="%s"><a href="%s">%s</a> - <a href="%s">%s</a> via <a href="%s">%s</a> - <span title="%s">%s</span></li>' % (item.adapter, 'http://last.fm/music/'+item.artist, item.artist, item.link, item.subject, item.origin, item.title, format_timestamp(item.timestamp), get_relative_datetime(item.timestamp))
+		return '<li class="%s"><a href="%s">%s</a> - <a href="%s">%s</a> via <a href="%s">%s</a> - <span title="%s">%s</span></li>' % (item['adapter'], 'http://last.fm/music/'+item['artist'], item['artist'], item['link'], item['subject'], item['origin'], item['title'], format_timestamp(item['timestamp']), get_relative_datetime(item['timestamp']))
 
 	@staticmethod
 	def parse_js(item = None):
-		return '<li class="%s">%s - %s via <a href="%s">%s</a> - <span><a href="%s" title="%s">%s</a></span></li>' % (item.adapter, item.artist, item.subject, item.origin, item.title, item.link, format_timestamp(item.timestamp), get_relative_datetime(item.timestamp))
+		return '<li class="%s">%s - %s via <a href="%s">%s</a> - <span><a href="%s" title="%s">%s</a></span></li>' % (item['adapter'], item['artist'], item['subject'], item['origin'], item['title'], item['link'], format_timestamp(item['timestamp']), get_relative_datetime(item['timestamp']))
 
 class TwitterFeed(RssFeed):
 	def __init__(self, username, source, identifer = '', title = '', timezone = 0, enable = True):

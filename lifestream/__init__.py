@@ -1,4 +1,4 @@
-import yaml,copy,logging
+import yaml,logging
 
 from google.appengine.ext import webapp
 from google.appengine.ext import db
@@ -35,14 +35,20 @@ class LifeStream():
 			self.feeds.append(instantiate('lifestream.feed.'+feed['adapter'], args))
 
 
-	def get_streams(self, force = False, limit = 100):
+	def get_streams(self, force = False, limit = 40):
 		if force == True:
 			memcache.delete('ls_streams')
-		ls_streams = memcache.get('ls_streams')
-		if ls_streams is None:
+		streams = memcache.get('ls_streams')
+		if streams is None:
 			ls_streams = Stream.all().order('-timestamp').fetch(limit)
-			memcache.set('ls_streams', ls_streams)
-		return ls_streams
+			streams = []
+			for stream in ls_streams:
+				if stream.adapter == 'LastFMFeed':
+					streams.append(dict(timestamp=stream.timestamp, adapter=str(stream.adapter), title=stream.title, origin=stream.origin, artist=stream.artist, subject=stream.subject, link=stream.link))
+				else:
+					streams.append(dict(timestamp=stream.timestamp, adapter=str(stream.adapter), title=stream.title, origin=stream.origin, subject=stream.subject, link=stream.link))
+			memcache.set('ls_streams', streams)
+		return streams
 
 	def sort(self, streams):
 		streams.sort(lambda x,y: cmp(y['timestamp'], x['timestamp']))

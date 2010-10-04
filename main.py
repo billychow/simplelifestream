@@ -25,7 +25,7 @@ class MainPage(webapp.RequestHandler):
 		self.response.out.write('<link href="/static/css/style.css" rel="stylesheet" type="text/css" />')
 		self.response.out.write('<ul class="lifestream">')
 		for stream in LifeStream.instance().get_streams():
-			entry = static_method('lifestream.feed.'+str(stream.adapter), 'parse', {'item':stream})
+			entry = static_method('lifestream.feed.'+stream['adapter'], 'parse', {'item':stream})
 			self.response.out.write('%s' % entry)
 		self.response.out.write('</ul>')
 
