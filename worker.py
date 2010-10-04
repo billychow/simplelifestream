@@ -8,24 +8,23 @@ class LifeStreamQueueWorker(webapp.RequestHandler):
 		count = len(LifeStream.instance().feeds)
 		for i in range(count):
 			taskqueue.add(url='/app_worker/task', method='GET', params={'index':i})
-		taskqueue.add(url='/app_worker/merge', method='GET', countdown=10)
+		taskqueue.add(url='/app_worker/refresh', method='GET', countdown=10)
 
 class LifeStreamTaskWorker(webapp.RequestHandler):
 	def get(self):
 		ls = LifeStream.instance()
 		index = int(self.request.get('index'))
-		if ls.feeds[index].update() == True and len(ls.feeds[index].data) > 0:
-			ls.set_data(ls.feeds[index].data, index)
+		ls.feeds[index].update()
 			
-class LifeStreamMergeWorker(webapp.RequestHandler):
+class LifeStreamRefreshWorker(webapp.RequestHandler):
 	def get(self):
-		LifeStream.instance().merge()
+		LifeStream.instance().get_streams(True)
 		
 def main():
 	application = webapp.WSGIApplication([
 		('/app_worker/queue', LifeStreamQueueWorker),
 		('/app_worker/task', LifeStreamTaskWorker),
-		('/app_worker/merge', LifeStreamMergeWorker)
+		('/app_worker/refresh', LifeStreamRefreshWorker)
 	], debug=True)
 	util.run_wsgi_app(application)
 	

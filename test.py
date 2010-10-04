@@ -16,6 +16,7 @@ from google.appengine.api.labs import taskqueue
 
 from lifestream import *
 from lifestream.feed import *
+from lifestream.model import *
 from dreammx.util import *
 
 class TestHandler(webapp.RequestHandler):
@@ -38,18 +39,20 @@ class TestHandler(webapp.RequestHandler):
 		print time.time()
 	
 	def test(self):
-		streams = []
-		for stream in LifeStream.instance().get_data().itervalues():
-			streams.extend(stream)
+		self.response.out.write('<link href="/static/css/style.css" rel="stylesheet" type="text/css" />')
+		self.response.out.write('<ul class="lifestream">')
+		
+		streams = Stream.all().order('-timestamp').fetch(100)
+		
 		for stream in streams:
-			self.response.out.write('%s<br />' % stream['title'])
+			entry = static_method('lifestream.feed.'+str(stream.adapter), 'parse', {'item':stream})
+			self.response.out.write('%s' % entry)
+		self.response.out.write('</ul>')
 	
 	def update(self):
 		ls = LifeStream.instance()
 		for index in range(len(ls.feeds)):
-			if ls.feeds[index].update() == True and len(ls.feeds[index].data) > 0:
-				ls.set_data(ls.feeds[index].data, index)
-		ls.merge()
+			if ls.feeds[index].update() == True:pass
 
 def main():
 	application = webapp.WSGIApplication([

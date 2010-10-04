@@ -1,8 +1,13 @@
 import yaml,copy,logging
+
 from google.appengine.ext import webapp
+from google.appengine.ext import db
 from google.appengine.api import memcache
+
 from dreammx.util import *
 from dreammx.appengine.cache import memcache as cache
+
+from lifestream.model import *
 
 class LifeStream():
 	_instance = None
@@ -22,34 +27,23 @@ class LifeStream():
 		# Initialize Feeds
 		for feed in self.config['feeds']:
 			args = {}
-			keys = filter(lambda k: k != 'identifer' and k != 'adapter' and k != 'active', feed.keys())
+			keys = filter(lambda k: k != 'adapter' and k != 'active', feed.keys())
 
 			for key in keys:
 				args[key] = feed[key]
 			# Dynamic initialize the feed instance and append to the list
 			self.feeds.append(instantiate('lifestream.feed.'+feed['adapter'], args))
 
-	def get_data(self):
-		return cache.get_set_default('ls_data', {})
 
-	def set_data(self, data, index = 0):
-		ls_data = self.get_data()
-		ls_data[index] = data
-		memcache.set('ls_data', ls_data)
-
-	def get_streams(self):
-		return cache.get_set_default('ls_streams', [])
-
-	def merge(self):
-		logging.info('Merging')
-		streams = []
-		for stream in self.get_data().itervalues():
-			streams.extend(stream)
-		self.sort(streams)
+	def get_streams(self, force = False, limit = 100):
+		if force == True:
+			memcache.delete('ls_streams')
+		ls_streams = memcache.get('ls_streams')
+		if ls_streams is None:
+			ls_streams = Stream.all().order('-timestamp').fetch(limit)
+			memcache.set('ls_streams', ls_streams)
+		return ls_streams
 
 	def sort(self, streams):
 		streams.sort(lambda x,y: cmp(y['timestamp'], x['timestamp']))
 		memcache.set('ls_streams', streams)
-
-class LifeStreamHandler(webapp.RequestHandler):
-	def __init__(): pass
