@@ -5,7 +5,7 @@ from google.appengine.ext import db
 from google.appengine.api import memcache
 
 from dreammx.util import *
-from dreammx.appengine.cache import memcache as cache
+from dreammx.appengine.cache import *
 
 from lifestream.model import *
 
@@ -35,21 +35,28 @@ class LifeStream():
 			self.feeds.append(instantiate('lifestream.feed.'+feed['adapter'], args))
 
 
-	def get_streams(self, force = False, limit = 40):
-		if force == True:
-			memcache.delete('ls_streams')
-		streams = memcache.get('ls_streams')
-		if streams is None:
-			ls_streams = Stream.all().order('-timestamp').fetch(limit)
-			streams = []
-			for stream in ls_streams:
-				if stream.adapter == 'LastFMFeed':
-					streams.append(dict(timestamp=stream.timestamp, adapter=str(stream.adapter), title=stream.title, origin=stream.origin, artist=stream.artist, subject=stream.subject, link=stream.link))
-				else:
-					streams.append(dict(timestamp=stream.timestamp, adapter=str(stream.adapter), title=stream.title, origin=stream.origin, subject=stream.subject, link=stream.link))
-			memcache.set('ls_streams', streams)
+	@memoize('ls_streams')
+	def get_streams(self, limit = 40):
+		streams = []
+		ls_streams = Stream.all().order('-timestamp').fetch(limit)
+		
+		for stream in ls_streams:
+			if stream.adapter == 'LastFMFeed':
+				streams.append(dict(timestamp=stream.timestamp, adapter=str(stream.adapter), title=stream.title, origin=stream.origin, artist=stream.artist, subject=stream.subject, link=stream.link))
+			else:
+				streams.append(dict(timestamp=stream.timestamp, adapter=str(stream.adapter), title=stream.title, origin=stream.origin, subject=stream.subject, link=stream.link))
 		return streams
-
-	def sort(self, streams):
-		streams.sort(lambda x,y: cmp(y['timestamp'], x['timestamp']))
-		memcache.set('ls_streams', streams)
+	
+	@staticmethod
+	def update_feed(index=0):
+		fresh_count = memcache.get('fresh_count')
+		update_count = LifeStream.instance().feeds[index].update()
+		if update_count > 0:
+			fresh_count += update_count
+			memcache.set('fresh_count', fresh_count)
+	
+	@staticmethod	
+	def refresh_stream():
+		fresh_count = memcache.get('fresh_count')
+		if fresh_count > 0:
+			memcache.delete('ls_streams')

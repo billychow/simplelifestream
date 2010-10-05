@@ -44,13 +44,12 @@ class RssFeed(Feed):
 	def update(self):
 		logging.info('UPDATE: %s' % self.source)
 		d = feedparser.parse(self.source)
-		if d.bozo == 1: return False
+		if d.bozo == 1: return 0
 		self.title = self.title != '' and self.title or d.channel.title
 		self.origin = d.feed.link
 		self.timestamp = hasattr(self, 'updated') and get_timestamp(d.updated)+self.tz_offset or get_timestamp()+self.tz_offset
 		self.last_updated = get_timestamp()+self.tz_offset
-		self.save(d.entries)
-		return True
+		return self.save(d.entries)
 
 	def save(self, entries):
 		fresh_streams = []
@@ -62,6 +61,7 @@ class RssFeed(Feed):
 		for entry in entries:
 			fresh_streams.append(Stream(timestamp=get_timestamp(entry.updated_parsed)+self.tz_offset, adapter=self.__class__.__name__, identifer=self.identifer, title=self.title, origin=self.origin, subject=entry.title, link=entry.link))
 		db.put(fresh_streams)
+		return len(fresh_streams)
 
 class AtomFeed(RssFeed): pass
 
@@ -75,14 +75,13 @@ class GoogleReaderShareFeed(AtomFeed):
 	def update(self):
 		logging.info('UPDATE: %s' % self.source)
 		d = feedparser.parse(self.source)
-		if d.bozo == 1: return False
+		if d.bozo == 1: return 0
 		self.title = self.title != '' and self.title or d.channel.title
 		self.origin = d.feed.links[1]['href']
 		self.timestamp = hasattr(self, 'updated') and get_timestamp(d.updated)+self.tz_offset or get_timestamp()+self.tz_offset
 		self.last_updated = get_timestamp()
 		
-		self.save(d.entries)
-		return True
+		return self.save(d.entries)
 
 class LastFMFeed(Feed):
 	def __init__(self, username, identifer = '', title = '', timezone = 0, enable = True):
@@ -97,11 +96,9 @@ class LastFMFeed(Feed):
 			d = urllib.urlopen(self.source)
 			xml = minidom.parse(d)
 			tracks = xml.getElementsByTagName('track')
-			self.save(tracks)
+			return self.save(tracks)
 		except Exception, e:
-			print e
-			return False
-		return True
+			return 0
 		
 	def save(self, tracks):
 		fresh_streams = []
@@ -113,6 +110,7 @@ class LastFMFeed(Feed):
 		for track in tracks:
 			fresh_streams.append(Stream(timestamp=int(track.childNodes[11].attributes['uts'].value)+self.tz_offset, adapter=self.__class__.__name__, identifer=self.identifer, title=self.title, origin=self.origin, artist=track.childNodes[1].firstChild.data, subject=track.childNodes[3].firstChild.data, link=track.childNodes[9].firstChild.data))
 		db.put(fresh_streams)
+		return len(fresh_streams)
 		
 	@staticmethod
 	def parse(item = None):
@@ -130,13 +128,12 @@ class TwitterFeed(RssFeed):
 	def update(self):
 		logging.info('UPDATE: %s' % self.source)
 		d = feedparser.parse(self.source)
-		if d.bozo == 1: return False
+		if d.bozo == 1: return 0
 		self.title = self.title != '' and self.title or d.channel.title
 		self.origin = origin='http://twitter.com/'+self.username
 		self.timestamp = hasattr(self, 'updated') and get_timestamp(d.updated)+self.tz_offset or get_timestamp()+self.tz_offset
 		self.last_updated = get_timestamp()
-		self.save(d.entries)
-		return True
+		return self.save(d.entries)
 
 	def save(self, entries):
 		fresh_streams = []
@@ -148,5 +145,6 @@ class TwitterFeed(RssFeed):
 		for entry in entries:
 			fresh_streams.append(Stream(timestamp=get_timestamp(entry.updated_parsed)+self.tz_offset, adapter=self.__class__.__name__, identifer=self.identifer, title=self.title, origin=self.origin, subject=entry.title[entry.title.index(':')+2:].replace("\n", "<br />"), link=entry.link))
 		db.put(fresh_streams)
+		return len(fresh_streams)
 
 class WordpressFeed(RssFeed):pass

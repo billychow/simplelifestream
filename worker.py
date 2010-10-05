@@ -1,10 +1,12 @@
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from google.appengine.api.labs import taskqueue
+from google.appengine.api import memcache
 from lifestream import *
 
 class LifeStreamQueueWorker(webapp.RequestHandler):
 	def get(self):
+		memcache.set('fresh_count', 0)
 		count = len(LifeStream.instance().feeds)
 		for i in range(count):
 			taskqueue.add(url='/app_worker/task', method='GET', params={'index':i})
@@ -12,13 +14,12 @@ class LifeStreamQueueWorker(webapp.RequestHandler):
 
 class LifeStreamTaskWorker(webapp.RequestHandler):
 	def get(self):
-		ls = LifeStream.instance()
 		index = int(self.request.get('index'))
-		ls.feeds[index].update()
+		LifeStream.update_feed(index)
 			
 class LifeStreamRefreshWorker(webapp.RequestHandler):
 	def get(self):
-		LifeStream.instance().get_streams(True)
+		LifeStream.refresh_stream()
 		
 def main():
 	application = webapp.WSGIApplication([
