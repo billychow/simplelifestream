@@ -42,5 +42,11 @@ handlers:
 - url: /test/.*
   script: test.py
   
+- url: /index
+  script: test.py
+
+- url: /index/.*
+  script: test.py
+  
 - url: /.*
   script: main.py

@@ -19,6 +19,48 @@ from lifestream.feed import *
 from lifestream.model import *
 from dreammx.util import *
 
+class Controller(webapp.RequestHandler):
+	_defaultAction = 'indexAction'
+	
+	def get(self, *args, **kwargs):
+		action = self.__class__._defaultAction
+		self._dict = {}
+
+		if len(args) > 0:
+			prev_seg = '_reserved'
+			self._dict['_reserved'] = []
+			segments = args[0].split('/')
+			for index, seg in enumerate(segments):
+				if index == 0 and seg.isalpha():
+					action = seg+'Action'
+					continue
+				if seg.isalpha():
+					prev_seg = seg
+					# check if dict already have the key of segment
+					if seg not in self._dict.keys():
+						self._dict[seg] = []
+				else:
+					self._dict[prev_seg].append(seg)
+
+		if hasattr(self, action):
+			action_method = getattr(self, action)
+			if callable(action_method):
+				return action_method(**self._dict)
+
+		return self._noRouteAction(*args, **self._dict)
+
+	def indexAction(self, *args, **kwargs):pass
+
+	def _noRouteAction(self, *args, **kwargs):
+		print 'no route!'
+
+class IndexController(Controller):
+	def indexAction(self, *args, **kwargs):
+		print 'index'
+
+	def viewAction(self, *args, **kwargs):
+		print 'view'
+
 class TestHandler(webapp.RequestHandler):
 	def get(self, name = ''):
 		if(name == ''):
@@ -65,7 +107,9 @@ class TestHandler(webapp.RequestHandler):
 def main():
 	application = webapp.WSGIApplication([
 		('/test', TestHandler),
-		('/test/(.*)', TestHandler)
+		('/test/(.*)', TestHandler),
+		('/index', IndexController),
+		('/index/(.*)', IndexController)
 	], debug=True)
 	util.run_wsgi_app(application)
 	

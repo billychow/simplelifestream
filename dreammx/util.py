@@ -2,12 +2,11 @@ import sys
 import time
 import datetime
 
-def get_timestamp(time_tuple = None, tz = 0):
-	if time_tuple is None: return int(time.time()) + 3600 * tz
-	return int(time.mktime(time_tuple)) + 3600 * tz
+def get_timestamp(time_tuple = None):
+	return time.time() if time_tuple is None else time.mktime(time_tuple)
 	
 def format_timestamp(ts, tz = 8):
-	return datetime.datetime.fromtimestamp(float(ts) + 3600 * tz).strftime('%Y-%m-%d %H:%M:%S')
+	return datetime.datetime.fromtimestamp(ts + 3600 * tz).strftime('%Y-%m-%d %H:%M:%S')
 	
 def get_relative_datetime(ts, tz = 0):
 	min = 60
