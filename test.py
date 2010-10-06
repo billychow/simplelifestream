@@ -36,7 +36,15 @@ class TestHandler(webapp.RequestHandler):
 			self.response.out.write('%s' % output)
 	
 	def time(self):
-		print time.time()
+		t = self.request.get('t')
+		if t != '':
+			ts = float(t)
+		else:
+			ts = time.time()
+		self.response.out.write('<pre>')
+		self.response.out.write('Timestamp: %f\n' % ts)
+		self.response.out.write('Datetime: %s' % format_timestamp(ts, 0))
+		self.response.out.write('</pre>')
 	
 	def test(self):
 		self.response.out.write('<link href="/static/css/style.css" rel="stylesheet" type="text/css" />')
