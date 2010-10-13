@@ -27,7 +27,7 @@ class IndexController(Controller): pass
 
 class TestController(Controller):
 	def indexAction(self):
-		print 'testAction'
+		self.render('index.html')
 	
 	def infoAction(self):
 		self.response.out.write('Feed Size: %d <br />' % len(LifeStream.instance().feeds))
