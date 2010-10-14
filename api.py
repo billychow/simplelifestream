@@ -18,8 +18,13 @@ class APIHandler(webapp.RequestHandler):
 
 class JSONHandler(webapp.RequestHandler):
 	def get(self):
+		jsoncallback = self.request.get('jsoncallback')
+
 		self.response.headers['Content-type'] = 'application/json'
-		self.response.out.write(simplejson.dumps(LifeStream.instance().get_streams()[:20]))
+		output = simplejson.dumps(LifeStream.instance().get_streams()[:20])
+		if jsoncallback != '':
+			output = jsoncallback +'(' + output + ')'
+		self.response.out.write(output)
 		
 def main():
 	application = webapp.WSGIApplication([
