@@ -18,6 +18,7 @@ class APIHandler(webapp.RequestHandler):
 
 class JSONHandler(webapp.RequestHandler):
 	def get(self):
+		self.response.headers['Content-type'] = 'application/json'
 		self.response.out.write(simplejson.dumps(LifeStream.instance().get_streams()[:20]))
 		
 def main():
