@@ -6,6 +6,10 @@ api_version: 1
 derived_file_type:
 - python_precompiled
 
+builtins:
+- remote_api: on
+- datastore_admin: on
+
 handlers:
 - url: /favicon.ico
   static_files: static/favicon.ico
@@ -15,10 +19,6 @@ handlers:
 - url: /robots.txt
   static_files: static/robots.txt
   upload: static/robots.txt
-
-- url: /remote_api
-  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
-  login: admin
 
 - url: /_ah/queue/deferred
   script: $PYTHON_LIB/google/appengine/ext/deferred/deferred.py
