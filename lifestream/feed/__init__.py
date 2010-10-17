@@ -1,11 +1,12 @@
 import logging
-import urllib
+import urllib, string
 from xml.dom import minidom
 
 from google.appengine.ext import db
 from google.appengine.api import memcache
 
 from dreammx.ext import feedparser
+from django.utils import simplejson
 from dreammx.util import *
 from lifestream.model import *
 
@@ -75,6 +76,29 @@ class DeliciousFeed(RssFeed): pass
 class DoubanFeed(RssFeed): pass
 # @TODO: OAuth, API
 class FacebookFeed(RssFeed):pass
+
+class FlickrFeed(Feed):
+	def update(self):
+		try:
+			d = urllib.urlopen(self.source)
+			content = string.join(d.readlines()).lstrip('jsonFlickrFeed(').rstrip(')')
+			data = simplejson.loads(content)
+			self.title = self.title != '' and self.title or data['title']
+			self.origin = data['link']
+			return self.save(data['items'])
+		except Exception, e:
+			return 0
+	
+	def save(self, items):
+		fresh_streams = []
+		last_timestamp = self.get_last_timestamp()
+		
+		if last_timestamp is not None:
+			items = filter(lambda item: get_timestamp(feedparser._parse_date_w3dtf(item['published']))+self.tz_offset > last_timestamp, items)
+		
+		for item in items:
+			fresh_streams.append(Stream(timestamp=int(get_timestamp(feedparser._parse_date_w3dtf(item['published'])))+self.tz_offset, adapter=self.__class__.__name__, identifer=self.identifer, title=self.title, origin=self.origin, subject=item['media']['m'], link=item['link'], tags=item['tags']))
+		db.put(fresh_streams)
 
 class GithubFeed(AtomFeed):pass
 class GoogleReaderShareFeed(AtomFeed):

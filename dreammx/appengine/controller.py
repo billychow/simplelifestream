@@ -38,11 +38,7 @@ class Controller(webapp.RequestHandler):
 		if hasattr(self, self._action):
 			action_method = getattr(self, self._action)
 			if callable(action_method):
-				try:
-					return action_method(*self._parms, **self._dict)
-				except Exception, e:
-					self.response.out.write('ERROR: %s' % e)
-					return
+				return action_method(*self._parms, **self._dict)
 
 		return self._noRouteAction(*self._parms, **self._dict)
 

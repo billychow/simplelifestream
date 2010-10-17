@@ -6,7 +6,7 @@ http://ws.audioscrobbler.com/1.0/user/BillyChow/recenttracks.xml
 http://feeds.delicious.com/rss/starhycold
 http://www.digg.com/users/{username}/history.rss
 http://www.facebook.com/feeds/notifications.php?id=1097364901&viewer=1097364901&key=7f3d207d2e&format=rss20
-http://api.flickr.com/services/feeds/photos_public.gne?id=49441535@N00&format=rss_200
+http://api.flickr.com/services/feeds/photos_public.gne?id=49441535@N00&format=json
 http://feeds.foursquare.com/history/OYPBKAKY3HMBKUUMQF4ZR51RN5RZ4ZVS.rss
 https://github.com/billychow.private.actor.atom?token=7b79404568e568e8687ccdd0b197ba48
 http://www.google.com/reader/public/atom/user%2F12293675360550919096%2Fstate%2Fcom.google%2Fbroadcast

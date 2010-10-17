@@ -24,6 +24,9 @@
 .lifestream .FacebookFeed {
 	background: url('../img/icons/facebook.png') no-repeat;
 }
+.lifestream .FlickrFeed {
+	background: url('../img/icons/flickr.png') no-repeat;
+}
 .lifestream .GithubFeed {
 	background: url('../img/icons/github.png') no-repeat;
 }
