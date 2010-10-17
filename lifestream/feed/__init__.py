@@ -71,6 +71,7 @@ class RssFeed(Feed):
 class AtomFeed(RssFeed): pass
 
 class BloggerFeed(AtomFeed): pass
+class DeliciousFeed(RssFeed): pass
 class DoubanFeed(RssFeed): pass
 # @TODO: OAuth, API
 class FacebookFeed(RssFeed):pass

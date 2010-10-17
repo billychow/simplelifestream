@@ -2,9 +2,8 @@ http://blog.dreammx.com/feed
 http://blog.billychow.me/feeds/posts/default?alt=rss
 http://www.douban.com/feed/people/starhycold/interests
 http://twitter.com/statuses/user_timeline/7319392.rss
-http://ws.audioscrobbler.com/1.0/user/BillyChow/recenttracks.rss
 http://ws.audioscrobbler.com/1.0/user/BillyChow/recenttracks.xml
-http://del.icio.us/rss/starhycold
+http://feeds.delicious.com/rss/starhycold
 http://www.digg.com/users/{username}/history.rss
 http://www.facebook.com/feeds/notifications.php?id=1097364901&viewer=1097364901&key=7f3d207d2e&format=rss20
 http://api.flickr.com/services/feeds/photos_public.gne?id=49441535@N00&format=rss_200

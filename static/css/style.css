@@ -15,6 +15,9 @@
 .lifestream .BloggerFeed {
 	background: url('../img/icons/blogger.png') no-repeat;
 }
+.lifestream .DeliciousFeed {
+	background: url('../img/icons/delicious.png') no-repeat;
+}
 .lifestream .DoubanFeed {
 	background: url('../img/icons/douban.png') no-repeat;
 }
