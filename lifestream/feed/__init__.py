@@ -97,7 +97,7 @@ class FlickrFeed(Feed):
 			items = filter(lambda item: get_timestamp(feedparser._parse_date_w3dtf(item['published']))+self.tz_offset > last_timestamp, items)
 		
 		for item in items:
-			fresh_streams.append(Stream(timestamp=int(get_timestamp(feedparser._parse_date_w3dtf(item['published'])))+self.tz_offset, adapter=self.__class__.__name__, identifer=self.identifer, title=self.title, origin=self.origin, subject=item['media']['m'], link=item['link'], tags=item['tags']))
+			fresh_streams.append(Stream(timestamp=int(get_timestamp(feedparser._parse_date_w3dtf(item['published'])))+self.tz_offset, adapter=self.__class__.__name__, identifer=self.identifer, title=self.title, origin=self.origin, subject=item['title'], link=item['link'], media=item['media']['m'], tags=item['tags']))
 		db.put(fresh_streams)
 
 class GithubFeed(AtomFeed):pass
