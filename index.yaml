@@ -6,3 +6,9 @@ indexes:
   - name: identifer
   - name: timestamp
     direction: desc
+    
+- kind: Stream
+  properties:
+  - name: identifer
+  - name: timestamp
+    direction: desc

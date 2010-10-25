@@ -1,5 +1,5 @@
 application: simplelifestream
-version: dev
+version: 1
 runtime: python
 api_version: 1
 
@@ -19,6 +19,10 @@ handlers:
 - url: /robots.txt
   static_files: static/robots.txt
   upload: static/robots.txt
+
+- url: /remote_api
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin
 
 - url: /_ah/queue/deferred
   script: $PYTHON_LIB/google/appengine/ext/deferred/deferred.py

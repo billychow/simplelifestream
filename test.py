@@ -48,15 +48,16 @@ class TestController(Controller):
 		self.response.out.write('Datetime: %s' % format_timestamp(ts, 0))
 		self.response.out.write('</pre>')
 	
-	def testAction(self):
+	def filterAction(self):
+		identifer = self.request.get('identifer')
+		
 		self.response.out.write('<link href="/static/css/style.css" rel="stylesheet" type="text/css" />')
 		self.response.out.write('<ul class="lifestream">')
 		
-		streams = Stream.all().order('-timestamp').fetch(100)
+		streams = Stream.all().filter('identifer = ', identifer).order('-timestamp').fetch(100)
 		
 		for stream in streams:
-			entry = static_method('lifestream.feed.'+str(stream.adapter), 'parse', {'item':stream})
-			self.response.out.write('%s' % entry)
+			self.response.out.write('<li>%s</li>' % stream.subject)
 		self.response.out.write('</ul>')
 	
 	def updateAction(self):
