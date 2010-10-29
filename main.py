@@ -18,10 +18,11 @@ from google.appengine.ext import webapp
 
 from lifestream import *
 from lifestream.feed import *
+from dreammx.appengine.controller import Controller
 from dreammx.util import *
 
-class MainPage(webapp.RequestHandler):
-	def get(self):
+class IndexController(Controller):
+	def indexAction(self):
 		self.response.out.write('<link href="/static/css/style.css" rel="stylesheet" type="text/css" />')
 		self.response.out.write('<ul class="lifestream">')
 		for stream in LifeStream.instance().get_streams():
@@ -31,7 +32,7 @@ class MainPage(webapp.RequestHandler):
 
 def main():
 	application = webapp.WSGIApplication([
-		('/', MainPage)
+		('/', IndexController)
 	], debug=True)
 	util.run_wsgi_app(application)
 
