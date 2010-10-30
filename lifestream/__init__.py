@@ -19,7 +19,6 @@ class LifeStream():
 		return LifeStream._instance
 
 	def __init__(self):
-		self.initialized = False
 		self.feeds = []
 		self.config = yaml.load(open('config.yaml'))
 		self.config['feeds'] = filter(lambda feed: feed['active'] == True, self.config['feeds'])

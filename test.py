@@ -64,6 +64,9 @@ class TestController(Controller):
 		ls = LifeStream.instance()
 		for index in range(len(ls.feeds)):
 			if ls.feeds[index].update() == True:pass
+			
+	def flushAction(self):
+		memcache.flush_all()
 
 def main():
 	application = webapp.WSGIApplication([
