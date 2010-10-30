@@ -51,6 +51,14 @@ handlers:
 
 - url: /index/.*
   script: test.py
+
+- url: /shell
+  script: shell.py
+  login: admin
   
+- url: /shell\.do
+  script: shell.py
+  login: admin
+
 - url: /.*
   script: main.py
