@@ -11,29 +11,26 @@ from dreammx.util import *
 from lifestream.model import *
 
 class Feed(object):
-	def __init__(self, source, identifer = '', title = '', timezone = 0, enable = True):
-		self.source = source
-		self.identifer = identifer
-		self.title = title.strip() != '' and title.strip() or ''
-		self.origin = ''
-		self.enable = enable
-		self.timestamp = None
-		self.timezone = int(timezone)
-		self.tz_offset = self.timezone * 3600
+	def __init__(self, config):
+		self.config = config
+		if config.has_key('timezone'):
+			self.config['tz_offset'] = int(config['timezone']) * 3600
+		else:
+			self.config['tz_offset'] = 0
 
 	def update(self):
-		raise Exception()
+		raise Exception('Not implement')
 		
 	def save(self):
-		raise Exception()
+		raise Exception('Not implement')
 		
 	def get_last_timestamp(self):
-		last_timestamp = memcache.get(self.identifer+'_last_timestamp')
+		last_timestamp = memcache.get(self.config['identifer']+'_last_timestamp')
 		if last_timestamp is not None: return last_timestamp
 		
-		streams = Stream.all().filter('identifer =', self.identifer).filter('adapter =', self.__class__.__name__).order('-timestamp').fetch(1)
+		streams = Stream.all().filter('identifer =', self.config['identifer']).filter('adapter =', self.__class__.__name__).order('-timestamp').fetch(1)
 		if(len(streams) == 1):
-			memcache.set(self.identifer+'_last_timestamp', streams[0].timestamp)
+			memcache.set(self.config['identifer']+'_last_timestamp', streams[0].timestamp)
 			return streams[0].timestamp
 
 	@staticmethod
@@ -46,12 +43,11 @@ class Feed(object):
 
 class RssFeed(Feed):
 	def update(self):
-		logging.info('UPDATE: %s' % self.source)
-		d = feedparser.parse(self.source)
+		logging.info('UPDATE: %s' % self.config['source'])
+		d = feedparser.parse(self.config['source'])
 		if d.bozo == 1: return 0
-		self.title = self.title != '' and self.title or d.channel.title
+		self.title = self.config.has_key('title') and self.config['title'] or d.channel.title
 		self.origin = d.feed.link
-		self.timestamp = int(get_updated_timestamp(d))+self.tz_offset
 		return self.save(d.entries)
 
 	def save(self, entries):
@@ -59,18 +55,17 @@ class RssFeed(Feed):
 		last_timestamp = self.get_last_timestamp()
 		
 		if last_timestamp is not None:
-			entries = filter(lambda entry: get_timestamp(entry.updated_parsed)+self.tz_offset > last_timestamp, entries)
+			entries = filter(lambda entry: get_timestamp(entry.updated_parsed)+self.config['tz_offset'] > last_timestamp, entries)
 		
 		for entry in entries:
-			fresh_streams.append(Stream(timestamp=int(get_timestamp(entry.updated_parsed))+self.tz_offset, adapter=self.__class__.__name__, identifer=self.identifer, title=self.title, origin=self.origin, subject=entry.title, link=entry.link))
+			fresh_streams.append(Stream(timestamp=int(get_timestamp(entry.updated_parsed))+self.config['tz_offset'], adapter=self.__class__.__name__, identifer=self.config['identifer'], title=self.title, origin=self.origin, subject=entry.title, link=entry.link))
 		db.put(fresh_streams)
 		
 		if len(entries) > 0:
-			memcache.set(self.identifer+'_last_timestamp', fresh_streams[0].timestamp)
+			memcache.set(self.config['identifer']+'_last_timestamp', fresh_streams[0].timestamp)
 		return len(fresh_streams)
 
 class AtomFeed(RssFeed): pass
-
 class BloggerFeed(AtomFeed): pass
 class DeliciousFeed(RssFeed): pass
 class DoubanFeed(RssFeed): pass
@@ -80,10 +75,10 @@ class FacebookFeed(RssFeed):pass
 class FlickrFeed(Feed):
 	def update(self):
 		try:
-			d = urllib.urlopen(self.source)
+			d = urllib.urlopen(self.config['source'])
 			content = string.join(d.readlines()).lstrip('jsonFlickrFeed(').rstrip(')')
 			data = simplejson.loads(content)
-			self.title = self.title != '' and self.title or data['title']
+			self.title = self.config.has_key('title') and self.config['title'] or data['title']
 			self.origin = data['link']
 			return self.save(data['items'])
 		except Exception, e:
@@ -94,37 +89,36 @@ class FlickrFeed(Feed):
 		last_timestamp = self.get_last_timestamp()
 		
 		if last_timestamp is not None:
-			items = filter(lambda item: get_timestamp(feedparser._parse_date_w3dtf(item['published']))+self.tz_offset > last_timestamp, items)
+			items = filter(lambda item: get_timestamp(feedparser._parse_date_w3dtf(item['published']))+self.config['tz_offset'] > last_timestamp, items)
 		
 		for item in items:
-			fresh_streams.append(Stream(timestamp=int(get_timestamp(feedparser._parse_date_w3dtf(item['published'])))+self.tz_offset, adapter=self.__class__.__name__, identifer=self.identifer, title=self.title, origin=self.origin, subject=item['title'], link=item['link'], media=item['media']['m'], tags=item['tags']))
+			fresh_streams.append(Stream(timestamp=int(get_timestamp(feedparser._parse_date_w3dtf(item['published'])))+self.config['tz_offset'], adapter=self.__class__.__name__, identifer=self.config['identifer'], title=self.title, origin=self.origin, subject=item['title'], link=item['link'], media=item['media']['m'], tags=item['tags']))
 		db.put(fresh_streams)
 
 class GithubFeed(AtomFeed):pass
 class GoogleReaderShareFeed(AtomFeed):
 	def update(self):
-		logging.info('UPDATE: %s' % self.source)
-		d = feedparser.parse(self.source)
+		logging.info('UPDATE: %s' % self.config['source'])
+		d = feedparser.parse(self.config['source'])
 		if d.bozo == 1: return 0
-		self.title = self.title != '' and self.title or d.channel.title
+		self.title = self.config.has_key('title') and self.config['title'] or d.channel.title
 		self.origin = d.feed.links[1]['href']
-		self.timestamp = int(get_updated_timestamp(d))+self.tz_offset
 		
 		return self.save(d.entries)
 
 class LastFMFeed(Feed):
-	def __init__(self, username, identifer = '', title = '', timezone = 0, enable = True):
-		source = 'http://ws.audioscrobbler.com/1.0/user/'+username+'/recenttracks.xml'
-		self.username = username
-		super(LastFMFeed, self).__init__(source, identifer, title, timezone, enable)
+	def __init__(self, config):
+		super(LastFMFeed, self).__init__(config)
+		self.config['source'] = 'http://ws.audioscrobbler.com/1.0/user/'+self.config['username']+'/recenttracks.xml'
 
 	def update(self):
-		logging.info('UPDATE: %s' % self.source)
-		self.origin = 'http://last.fm/user/'+self.username
+		logging.info('UPDATE: %s' % self.config['source'])
 		try:
-			d = urllib.urlopen(self.source)
+			d = urllib.urlopen(self.config['source'])
 			xml = minidom.parse(d)
 			tracks = xml.getElementsByTagName('track')
+			self.title = 'last.fm'
+			self.origin = 'http://last.fm/user/'+self.config['username']
 			return self.save(tracks)
 		except Exception, e:
 			return 0
@@ -134,14 +128,14 @@ class LastFMFeed(Feed):
 		last_timestamp = self.get_last_timestamp()
 		
 		if last_timestamp is not None:
-			tracks = filter(lambda track: int(track.childNodes[11].attributes['uts'].value)+self.tz_offset > last_timestamp, tracks)
+			tracks = filter(lambda track: int(track.childNodes[11].attributes['uts'].value)+self.config['tz_offset'] > last_timestamp, tracks)
 		
 		for track in tracks:
-			fresh_streams.append(Stream(timestamp=int(track.childNodes[11].attributes['uts'].value)+self.tz_offset, adapter=self.__class__.__name__, identifer=self.identifer, title=self.title, origin=self.origin, artist=track.childNodes[1].firstChild.data, subject=track.childNodes[3].firstChild.data, link=track.childNodes[9].firstChild.data))
+			fresh_streams.append(Stream(timestamp=int(track.childNodes[11].attributes['uts'].value)+self.config['tz_offset'], adapter=self.__class__.__name__, identifer=self.config['identifer'], title=self.title, origin=self.origin, artist=track.childNodes[1].firstChild.data, subject=track.childNodes[3].firstChild.data, link=track.childNodes[9].firstChild.data))
 		db.put(fresh_streams)
 		
 		if len(tracks) > 0:
-			memcache.set(self.identifer+'_last_timestamp', fresh_streams[0].timestamp)
+			memcache.set(self.config['identifer']+'_last_timestamp', fresh_streams[0].timestamp)
 		
 		return len(fresh_streams)
 		
@@ -154,17 +148,12 @@ class LastFMFeed(Feed):
 		return '<li class="%s">%s - %s via <a href="%s">%s</a> - <span><a href="%s" title="%s">%s</a></span></li>' % (item['adapter'], item['artist'], item['subject'], item['origin'], item['title'], item['link'], format_timestamp(item['timestamp']), get_relative_datetime(item['timestamp']))
 
 class TwitterFeed(RssFeed):
-	def __init__(self, username, source, identifer = '', title = '', timezone = 0, enable = True):
-		self.username = username
-		super(TwitterFeed, self).__init__(source, identifer, title, timezone, enable)
-	
 	def update(self):
-		logging.info('UPDATE: %s' % self.source)
-		d = feedparser.parse(self.source)
+		logging.info('UPDATE: %s' % self.config['source'])
+		d = feedparser.parse(self.config['source'])
 		if d.bozo == 1: return 0
-		self.title = self.title != '' and self.title or d.channel.title
-		self.origin = origin='http://twitter.com/'+self.username
-		self.timestamp = int(get_updated_timestamp(d))+self.tz_offset
+		self.title = self.config.has_key('title') and self.config['title'] or d.channel.title
+		self.origin = d.channel.link
 		return self.save(d.entries)
 
 	def save(self, entries):
@@ -172,23 +161,15 @@ class TwitterFeed(RssFeed):
 		last_timestamp = self.get_last_timestamp()
 		
 		if last_timestamp is not None:
-			entries = filter(lambda entry: get_timestamp(entry.updated_parsed)+self.tz_offset > last_timestamp, entries)
+			entries = filter(lambda entry: get_timestamp(entry.updated_parsed)+self.config['tz_offset'] > last_timestamp, entries)
 		
 		for entry in entries:
-			fresh_streams.append(Stream(timestamp=int(get_timestamp(entry.updated_parsed))+self.tz_offset, adapter=self.__class__.__name__, identifer=self.identifer, title=self.title, origin=self.origin, subject=entry.title[entry.title.index(':')+2:].replace("\n", "<br />"), link=entry.link))
+			fresh_streams.append(Stream(timestamp=int(get_timestamp(entry.updated_parsed))+self.config['tz_offset'], adapter=self.__class__.__name__, identifer=self.config['identifer'], title=self.title, origin=self.origin, subject=entry.title[entry.title.index(':')+2:].replace("\n", "<br />"), link=entry.link))
 		db.put(fresh_streams)
 		
 		if len(entries) > 0:
-			memcache.set(self.identifer+'_last_timestamp', fresh_streams[0].timestamp)
+			memcache.set(self.config['identifer']+'_last_timestamp', fresh_streams[0].timestamp)
 		
 		return len(fresh_streams)
 
 class WordpressFeed(RssFeed):pass
-
-def get_updated_timestamp(data):
-	if hasattr(data, 'updated'):
-		return get_timestamp(data.updated)
-	elif hasattr(data, 'feed') and hasattr(data.feed, 'updated_parsed'):
-		return get_timestamp(data.feed.updated_parsed)
-	else:
-		return get_timestamp()

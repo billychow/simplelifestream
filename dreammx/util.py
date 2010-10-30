@@ -75,7 +75,8 @@ def instantiate(str, args = {}):
 	from_module = __import__(modulename, globals(), locals(), [modulename])
 
 	#return getattr(sys.modules[modulename], classname)(**args)
-	return getattr(from_module, classname)(**args)
+	#return getattr(from_module, classname)(**args)
+	return getattr(from_module, classname)(args)
 
 def static_method(str, method, args = {}):
 	path = str.split('.')

@@ -20,24 +20,33 @@ class LifeStream():
 
 	def __init__(self):
 		self.feeds = []
+		self.indexes = []
+		self.hidden = []
 		self.config = yaml.load(open('config.yaml'))
-		self.config['feeds'] = filter(lambda feed: feed['active'] == True, self.config['feeds'])
 
 		# Initialize Feeds
-		for feed in self.config['feeds']:
+		for index, feed in enumerate(self.config['feeds']):
 			args = {}
-			keys = filter(lambda k: k != 'adapter' and k != 'active', feed.keys())
-
-			for key in keys:
+			for key in feed.keys():
 				args[key] = feed[key]
 			# Dynamic initialize the feed instance and append to the list
 			self.feeds.append(instantiate('lifestream.feed.'+feed['adapter'], args))
-
+			
+			if feed.has_key('visibility') and feed['visibility'] is False:
+				self.hidden.append(feed['identifer'])
+			if feed.has_key('disabled') and feed['disabled'] is True:
+				continue
+			else:
+				self.indexes.append(index)
 
 	@memoize('ls_streams')
 	def get_streams(self, limit = 40):
 		streams = []
-		ls_streams = Stream.all().order('-timestamp').fetch(limit)
+		q = Stream.all()
+		#for identifer in self.hidden:
+		#	logging.info('FILTER: %s' % identifer)
+		#	q.filter('identifer !=', identifer)
+		ls_streams = q.order('-timestamp').fetch(limit)
 		
 		for stream in ls_streams:
 			if stream.adapter == 'LastFMFeed':

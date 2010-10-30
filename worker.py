@@ -7,9 +7,9 @@ from lifestream import *
 class LifeStreamQueueWorker(webapp.RequestHandler):
 	def get(self):
 		memcache.set('fresh_count', 0)
-		count = len(LifeStream.instance().feeds)
-		for i in range(count):
-			taskqueue.add(url='/app_worker/task', method='GET', params={'index':i})
+		indexes = LifeStream.instance().indexes
+		for index in indexes:
+			taskqueue.add(url='/app_worker/task', method='GET', params={'index':index})
 		taskqueue.add(url='/app_worker/refresh', method='GET', countdown=10)
 
 class LifeStreamTaskWorker(webapp.RequestHandler):
