@@ -42,11 +42,8 @@ class LifeStream():
 	@memoize('ls_streams')
 	def get_streams(self, limit = 40):
 		streams = []
-		q = Stream.all()
-		#for identifer in self.hidden:
-		#	logging.info('FILTER: %s' % identifer)
-		#	q.filter('identifer !=', identifer)
-		ls_streams = q.order('-timestamp').fetch(limit)
+		ls_streams = Stream.all().order('-timestamp').fetch(limit)
+		ls_streams = filter(lambda stream: stream.identifer not in self.hidden, ls_streams)
 		
 		for stream in ls_streams:
 			if stream.adapter == 'LastFMFeed':
