@@ -12,3 +12,8 @@ indexes:
   - name: identifer
   - name: timestamp
     direction: desc
+
+- kind: Counter
+  properties:
+  - name: key
+  - name: value
