@@ -1,0 +1,38 @@
+lifestream_name: Billy's LifeStream
+
+feeds:
+- identifer: blog.billychow.me
+  adapter: BloggerFeed
+  source: http://blog.billychow.me/feeds/posts/default
+  title: Billy's Weblog
+  timezone: -8
+
+- identifer: blog.dreammx.com
+  adapter: WordpressFeed
+  source: http://blog.dreammx.com/feed
+  title: DreamMX Weblog
+
+- identifer: douban/starhycold
+  adapter: DoubanFeed
+  source: http://www.douban.com/feed/people/starhycold/interests
+  title: 豆瓣
+
+- identifer: github/billychow
+  adapter: GithubFeed
+  source: https://github.com/billychow.private.actor.atom?token=xxxxx
+  title: github
+
+- identifer: googlereader/billychou
+  adapter: GoogleReaderShareFeed
+  source: http://www.google.com/reader/public/atom/user/xxxxxxx/state/com.google/broadcast
+  title: Google Reader
+
+- identifer: lastfm/billychow
+  adapter: LastFMFeed
+  username: billychow
+  title: last.fm
+
+- identifer: twitter/billychow
+  adapter: TwitterFeed
+  source: http://twitter.com/statuses/user_timeline/7319392.rss
+  title: Twitter
